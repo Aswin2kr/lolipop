@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Form</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        #formContainer {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 400px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        #message {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+
+        a {
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h2>Welcome to Christ</h2>
+    <marquee>Click the button for Register</marquee>
+    <button id="showFormButton">Show Form</button>
+    <div id="formContainer" style="display: none;">
+        <form id="myForm" method="post" action="{% url 'myapp:order_form' %}" onsubmit="submitForm(event)">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <input type="submit" value="Submit">
+        </form>
+
+        <div id="message" style="display: none;"></div>
+        <p><a href="/">Return to Home</a></p>
+    </div>
+
+    <script>
+        // JavaScript to show the form
+        $('#showFormButton').click(function () {
+            $('#formContainer').show();
+        });
+
+        // JavaScript to populate the "Courses" dropdown based on the selected department
+        $('#id_department').change(function () {
+            const departmentId = $(this).val();
+            $.get('{% url "myapp:load_courses" %}', { department: departmentId }, function (data) {
+                const coursesDropdown = $('#id_courses');
+                coursesDropdown.empty();
+                $.each(data, function (index, course) {
+                    coursesDropdown.append($('<option>', {
+                        value: course.id,
+                        text: course.name
+                    }));
+                });
+            });
+        });
+
+        // JavaScript to handle form submission and display the message
+        $('#myForm').submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "myapp:order_form" %}',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    $('#message').text(data.message);
+                    $('#message').show();
+                }
+            });
+        });
+
+        const departmentDropdown = $('#id_department');
+        departmentDropdown.append($('<option>', {
+            value: 'commerce',
+            text: 'Commerce'
+        }));
+        departmentDropdown.append($('<option>', {
+            value: 'science',
+            text: 'Science'
+        }));
+        departmentDropdown.append($('<option>', {
+            value: 'arts',
+            text: 'Arts'
+        }));
+        departmentDropdown.append($('<option>', {
+            value: 'it',
+            text: 'IT'
+        }));
+         departmentDropdown.append($('<option>', {
+            value: 'english',
+            text: 'English'
+        }));
+
+
+
+        const coursesByDepartment = {
+            commerce: ['BBA', 'BCom', 'MBA'],
+            science: ['Physics', 'Chemistry', 'Biology'],
+            arts: ['History', 'Literature', 'Sociology'],
+            it: ['BCA','MCA','MSc Computer science'],
+            english:['BA','MA','PHD']
+            // Add more courses for each department as needed
+        };
+
+        // Function to populate the "Courses" dropdown based on the selected department
+        function populateCoursesDropdown(selectedDepartment) {
+            const coursesDropdown = $('#id_courses');
+            coursesDropdown.empty();
+
+            if (selectedDepartment in coursesByDepartment) {
+                const courses = coursesByDepartment[selectedDepartment];
+                courses.forEach(course => {
+                    coursesDropdown.append($('<option>', {
+                        value: course,
+                        text: course
+                    }));
+                });
+            }
+        }
+
+        // Initialize the "Courses" dropdown based on the initial selected department
+        const initialSelectedDepartment = departmentDropdown.val();
+        populateCoursesDropdown(initialSelectedDepartment);
+
+        // Update the "Courses" dropdown when the department changes
+        departmentDropdown
+    </script>
+<script>
+    function submitForm(event) {
+        event.preventDefault(); // Prevent the form from submitting traditionally
+
+        // You can perform additional form submission handling here if needed
+
+        // Display the message
+        const messageDiv = document.getElementById("message");
+        messageDiv.style.display = "block"; // Show the message div
+        messageDiv.innerText = "Submitted"; // Set the message text
+    }
+</script>
+
+
+</body>
+</html>
